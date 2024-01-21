@@ -9,7 +9,7 @@ function NewRequest() {
     const [numOfGames, setNumOfGames] = useState("");
     const [conditions, setConditions] = useState([{ left: "", operator: "", right: "" }]);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const options = ["<", ">", "="];
+    const options = ["<", ">", ">=", "<=", "="];
 
     const handleDropdownChange = (event: SelectChangeEvent<string>, index: number) => {
       const newConditions = [...conditions];
@@ -42,7 +42,7 @@ function NewRequest() {
       }
 
       // Validate conditions
-      for (let condition of conditions) {
+      for (const condition of conditions) {
         if (condition.left === "" || condition.operator === "" || condition.right === "" ||
             isNaN(Number(condition.left)) || isNaN(Number(condition.right))) {
           return;
@@ -69,6 +69,7 @@ function NewRequest() {
             error={isSubmitted && (numOfGames === "" || isNaN(Number(numOfGames)))}
             helperText={isSubmitted && (numOfGames === "" || isNaN(Number(numOfGames))) && "Please enter a valid number"}
             onChange={(e) => setNumOfGames(e.target.value)} 
+            style={{ width: 300 }}
           />
           {conditions.map((condition, index) => (
             <Box key={index} display="flex" gap={2}>
