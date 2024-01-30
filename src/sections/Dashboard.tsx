@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  getAllRequests,
+  getAllTrackingUuid,
   getSimulateResult,
   getBatchSimulateStatus,
 } from "../controllers/BlackjackHttpController";
@@ -11,8 +11,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
 } from "@mui/material";
-import { GameResult } from "../models/blackjackTypes";
+import { GameRecord, GameResult } from "../models/blackjackTypes";
 
 function Dashboard() {
   const [results, setResults] = useState(new Map<string, GameResult>());
@@ -20,16 +21,13 @@ function Dashboard() {
   const [selectedTrackingUuid, setSelectedTrackingUuid] = useState<string>();
   const [nonCompleteUuids, setNonCompleteUuids] = useState<string[]>([]);
   const [uuidStatusMap, setUuidStatusMap] = useState(new Map<string, string>());
-  const [requestMap, setRequestMap] = useState(new Map<string, any>());
 
   useEffect(() => {
     const fetchAllTrackingUuid = async () => {
       try {
-        const results = await getAllRequests();
-        console.log(results);
-        setRequestMap(results);
-        setTrackingUuids(Array.from(results.keys()));
-        setNonCompleteUuids(Array.from(results.keys()));
+        const uuids = await getAllTrackingUuid();
+        setTrackingUuids(uuids);
+        setNonCompleteUuids(uuids);
       } catch (error) {
         console.error(`Failed to fetch tracking UUIDs: ${error}`);
       }
@@ -44,11 +42,9 @@ function Dashboard() {
         const resultMap = new Map(results);
         await Promise.all(
           trackingUuids
-            .filter(
-              (uuid) =>
-                !results.get(uuid) && uuidStatusMap.get(uuid) === "completed"
-            )
+            .filter((uuid) => !results.has(uuid))
             .map(async (trackingUuid) => {
+              console.log("got tracking uuid" + trackingUuid);
               const result = await getSimulateResult(trackingUuid);
               resultMap.set(trackingUuid, result);
             })
@@ -115,7 +111,9 @@ function Dashboard() {
                   {uuid}
                 </TableCell>
                 <TableCell>{uuidStatusMap.get(uuid)}</TableCell>
-                <TableCell>{requestMap.get(uuid).numOfGame}</TableCell>
+                <TableCell>
+                  {getLastGameRecord(results?.get(uuid))?.gameNumber}
+                </TableCell>
                 <TableCell>
                   {getLastGameRecord(results?.get(uuid))?.playerAfterGameAsset}
                 </TableCell>
