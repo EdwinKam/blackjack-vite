@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  getAllTrackingUuid,
+  getAllRequests,
   getSimulateResult,
   getBatchSimulateStatus,
 } from "../controllers/BlackjackHttpController";
@@ -20,13 +20,16 @@ function Dashboard() {
   const [selectedTrackingUuid, setSelectedTrackingUuid] = useState<string>();
   const [nonCompleteUuids, setNonCompleteUuids] = useState<string[]>([]);
   const [uuidStatusMap, setUuidStatusMap] = useState(new Map<string, string>());
+  const [requestMap, setRequestMap] = useState(new Map<string, any>());
 
   useEffect(() => {
     const fetchAllTrackingUuid = async () => {
       try {
-        const uuids = await getAllTrackingUuid();
-        setTrackingUuids(uuids);
-        setNonCompleteUuids(uuids);
+        const results = await getAllRequests();
+        console.log(results);
+        setRequestMap(results);
+        setTrackingUuids(Array.from(results.keys()));
+        setNonCompleteUuids(Array.from(results.keys()));
       } catch (error) {
         console.error(`Failed to fetch tracking UUIDs: ${error}`);
       }
@@ -112,9 +115,7 @@ function Dashboard() {
                   {uuid}
                 </TableCell>
                 <TableCell>{uuidStatusMap.get(uuid)}</TableCell>
-                <TableCell>
-                  {getLastGameRecord(results?.get(uuid))?.gameNumber}
-                </TableCell>
+                <TableCell>{requestMap.get(uuid).numOfGame}</TableCell>
                 <TableCell>
                   {getLastGameRecord(results?.get(uuid))?.playerAfterGameAsset}
                 </TableCell>
