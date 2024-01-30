@@ -11,9 +11,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
 } from "@mui/material";
-import { GameRecord, GameResult } from "../models/blackjackTypes";
+import { GameResult } from "../models/blackjackTypes";
 
 function Dashboard() {
   const [results, setResults] = useState(new Map<string, GameResult>());
@@ -42,9 +41,11 @@ function Dashboard() {
         const resultMap = new Map(results);
         await Promise.all(
           trackingUuids
-            .filter((uuid) => !results.has(uuid))
+            .filter(
+              (uuid) =>
+                !results.get(uuid) && uuidStatusMap.get(uuid) === "completed"
+            )
             .map(async (trackingUuid) => {
-              console.log("got tracking uuid" + trackingUuid);
               const result = await getSimulateResult(trackingUuid);
               resultMap.set(trackingUuid, result);
             })
