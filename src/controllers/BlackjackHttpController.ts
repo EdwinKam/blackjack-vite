@@ -84,7 +84,7 @@ export const getBatchSimulateStatus = async (
   }
 };
 
-export const getAllTrackingUuid = async (): Promise<string[]> => {
+export const getAllRequests = async (): Promise<Map<string, any>> => {
   try {
     const response = await axios.get(`${url}/getAllTrackingUuid`, {
       headers: {
@@ -93,7 +93,8 @@ export const getAllTrackingUuid = async (): Promise<string[]> => {
     });
 
     if (response.status === 200) {
-      return response.data;
+      const resultMap = new Map(Object.entries(response.data));
+      return resultMap;
     } else {
       throw new Error(`Request failed with status code ${response.status}`);
     }
