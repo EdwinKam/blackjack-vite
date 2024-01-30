@@ -62,9 +62,7 @@ function NewRequest() {
       if (
         condition.left === "" ||
         condition.operator === "" ||
-        condition.right === "" ||
-        isNaN(Number(condition.left)) ||
-        isNaN(Number(condition.right))
+        condition.right === ""
       ) {
         return;
       }
@@ -80,7 +78,7 @@ function NewRequest() {
         } ${condition.bet}`
       );
     });
-    await simulateRequest(numOfGames, conditions);
+    console.log(await simulateRequest(numOfGames, conditions));
     // Continue processing...
   };
 

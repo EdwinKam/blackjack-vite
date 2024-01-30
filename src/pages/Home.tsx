@@ -1,8 +1,14 @@
 // import { useState } from 'react'
-import NewRequest from "../components/NewRequest"
+import Dashboard from "../sections/Dashboard";
+import NewRequest from "../sections/NewRequest";
 
 function Home() {
-    return <NewRequest />
+  return (
+    <>
+      <NewRequest />
+      <Dashboard />
+    </>
+  );
 }
 
-export default Home
+export default Home;
