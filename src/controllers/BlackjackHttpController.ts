@@ -1,13 +1,13 @@
 import axios from "axios";
-import { GameResult } from "../models/blackjackTypes";
+import { GameResult, SimulateRequestHistory } from "../models/blackjackTypes";
 
 // const url = 'https://blackjack-service-render.onrender.com/blackjack';
 const url = "http://localhost:8080/blackjack";
 
 export type Condition = {
-  left: string;
-  operator: string;
-  right: string;
+  leftValue: string;
+  comparisonOperator: string;
+  rightValue: string;
   bet: string;
 };
 
@@ -18,7 +18,12 @@ export const simulateRequest = async (
   try {
     const response = await axios.post(
       `${url}/simulateRequest`,
-      betStrategies.map((s) => [s.left, s.operator, s.right, s.bet]),
+      betStrategies.map((s) => [
+        s.leftValue,
+        s.comparisonOperator,
+        s.rightValue,
+        s.bet,
+      ]),
       {
         params: {
           numOfGame: numOfGames,
@@ -32,7 +37,7 @@ export const simulateRequest = async (
       throw new Error(`Request failed with status code ${response.status}`);
     }
   } catch (error) {
-    console.error(`Error in simulateRequest: ${error}`);
+    console.error(`Error in SimulateRequest: ${error}`);
     throw error;
   }
 };
@@ -84,16 +89,21 @@ export const getBatchSimulateStatus = async (
   }
 };
 
-export const getAllRequests = async (): Promise<Map<string, any>> => {
+export const getAllRequests = async (): Promise<
+  Map<string, SimulateRequestHistory>
+> => {
   try {
     const response = await axios.get(`${url}/getAllTrackingUuid`, {
       headers: {
         "Content-Type": "application/json",
       },
     });
-
+    const resultMap = new Map<string, SimulateRequestHistory>();
     if (response.status === 200) {
-      const resultMap = new Map(Object.entries(response.data));
+      for (const [key, value] of Object.entries(response.data)) {
+        resultMap.set(key, value as SimulateRequestHistory);
+      }
+
       return resultMap;
     } else {
       throw new Error(`Request failed with status code ${response.status}`);
