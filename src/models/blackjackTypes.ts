@@ -1,3 +1,5 @@
+import { Condition } from "../controllers/BlackjackHttpController";
+
 export interface CardHand {
   bet: number;
   cardCount: number;
@@ -20,4 +22,16 @@ export interface GameRecord {
 
 export interface GameResult {
   gameRecords: GameRecord[];
+}
+
+export interface SimulateRequestHistory {
+  customPlayerBetStrategies: Condition[];
+  numOfGame: number;
+  trackingUuid: string;
+  creationTimeStamp: number;
+}
+
+export enum StatusMessage {
+  COMPLETED = "COMPLETED",
+  FAILURE = "FAILURE",
 }

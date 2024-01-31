@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import Dropdown from "../components/Dropdown";
 import { SelectChangeEvent } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -9,10 +9,14 @@ import {
   simulateRequest,
 } from "../controllers/BlackjackHttpController";
 
-function NewRequest() {
+interface NewRequestProps {
+  setRefreshDashboard: Dispatch<SetStateAction<number>>;
+}
+
+function NewRequest({ setRefreshDashboard }: NewRequestProps) {
   const [numOfGames, setNumOfGames] = useState("");
   const [conditions, setConditions] = useState<Condition[]>([
-    { left: "", operator: "", right: "", bet: "" },
+    { leftValue: "", comparisonOperator: "", rightValue: "", bet: "" },
   ]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const options = ["<", ">", ">=", "<=", "="];
@@ -22,7 +26,7 @@ function NewRequest() {
     index: number
   ) => {
     const newConditions = [...conditions];
-    newConditions[index].operator = event.target.value;
+    newConditions[index].comparisonOperator = event.target.value;
     setConditions(newConditions);
   };
 
@@ -39,7 +43,7 @@ function NewRequest() {
   const handleAddCondition = () => {
     setConditions([
       ...conditions,
-      { left: "", operator: "", right: "", bet: "" },
+      { leftValue: "", comparisonOperator: "", rightValue: "", bet: "" },
     ]);
   };
 
@@ -51,7 +55,7 @@ function NewRequest() {
 
   const handleSubmit = async () => {
     setIsSubmitted(true);
-
+    setRefreshDashboard((p) => p + 1);
     // Validate number of games
     if (numOfGames === "" || isNaN(Number(numOfGames))) {
       return;
@@ -60,9 +64,9 @@ function NewRequest() {
     // Validate conditions
     for (const condition of conditions) {
       if (
-        condition.left === "" ||
-        condition.operator === "" ||
-        condition.right === ""
+        condition.leftValue === "" ||
+        condition.comparisonOperator === "" ||
+        condition.rightValue === ""
       ) {
         return;
       }
@@ -73,9 +77,9 @@ function NewRequest() {
     console.log("Conditions:");
     conditions.forEach((condition, index) => {
       console.log(
-        `Condition ${index + 1}: ${condition.left} ${condition.operator} ${
-          condition.right
-        } ${condition.bet}`
+        `Condition ${index + 1}: ${condition.leftValue} ${
+          condition.comparisonOperator
+        } ${condition.rightValue} ${condition.bet}`
       );
     });
     console.log(await simulateRequest(numOfGames, conditions));
@@ -101,39 +105,33 @@ function NewRequest() {
       {conditions.map((condition, index) => (
         <Box key={index} display="flex" gap={2}>
           <TextField
-            value={condition.left}
-            onChange={(e) => handleInputChange(e, index, "left")}
-            error={
-              isSubmitted &&
-              (condition.left === "" || isNaN(Number(condition.left)))
-            }
+            value={condition.leftValue}
+            onChange={(e) => handleInputChange(e, index, "leftValue")}
+            error={isSubmitted && condition.leftValue === ""}
             helperText={
               isSubmitted &&
-              (condition.left === "" || isNaN(Number(condition.left))) &&
+              condition.leftValue === "" &&
               "Please enter a valid number"
             }
           />
           <Dropdown
-            value={condition.operator}
+            value={condition.comparisonOperator}
             label="Operator"
             options={options}
             handleChange={(e) => handleDropdownChange(e, index)}
-            error={isSubmitted && condition.operator === ""}
+            error={isSubmitted && condition.comparisonOperator === ""}
           />
           <TextField
-            value={condition.right}
-            onChange={(e) => handleInputChange(e, index, "right")}
-            error={
-              isSubmitted &&
-              (condition.right === "" || isNaN(Number(condition.right)))
-            }
+            value={condition.rightValue}
+            onChange={(e) => handleInputChange(e, index, "rightValue")}
+            error={isSubmitted && condition.rightValue === ""}
             helperText={
               isSubmitted &&
-              (condition.right === "" || isNaN(Number(condition.right))) &&
+              condition.rightValue === "" &&
               "Please enter a valid number"
             }
           />
-          <TextField // new field
+          <TextField
             value={condition.bet}
             onChange={(e) => handleInputChange(e, index, "bet")}
             error={isSubmitted && condition.bet === ""}
