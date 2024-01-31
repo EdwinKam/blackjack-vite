@@ -1,8 +1,8 @@
 import axios from "axios";
 import { GameResult, SimulateRequestHistory } from "../models/blackjackTypes";
 
-// const url = 'https://blackjack-service-render.onrender.com/blackjack';
-const url = "http://localhost:8080/blackjack";
+const url = "https://blackjack-service-render.onrender.com/blackjack";
+// const url = "http://localhost:8080/blackjack";
 
 export type Condition = {
   leftValue: string;
