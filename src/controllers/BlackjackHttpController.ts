@@ -13,7 +13,9 @@ export type Condition = {
 
 export const simulateRequest = async (
   numOfGames: string,
-  betStrategies: Condition[]
+  betStrategies: Condition[],
+  numOfDecks: string,
+  cutOff: string
 ): Promise<string> => {
   try {
     const response = await axios.post(
@@ -27,6 +29,8 @@ export const simulateRequest = async (
       {
         params: {
           numOfGame: numOfGames,
+          numOfDecks: numOfDecks,
+          cutOff: cutOff,
         },
       }
     );
