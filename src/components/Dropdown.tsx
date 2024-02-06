@@ -32,7 +32,9 @@ export default function Dropdown({
           onChange={handleChange}
         >
           {options.map((o) => (
-            <MenuItem value={o}>{o}</MenuItem>
+            <MenuItem key={o} value={o}>
+              {o}
+            </MenuItem>
           ))}
         </Select>
         {error && <FormHelperText>{label} is required</FormHelperText>}

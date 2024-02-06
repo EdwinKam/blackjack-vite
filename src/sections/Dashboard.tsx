@@ -42,6 +42,7 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
       try {
         const results = await getAllRequests();
         setAllRequest(results);
+        setNonCompleteUuids(results.map((request) => request.trackingUuid));
       } catch (error) {
         console.error(`Failed to fetch tracking UUIDs: ${error}`);
       }
@@ -51,9 +52,10 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
   }, [refreshDashboard]);
 
   useEffect(() => {
-    const fetchAllTrackingUuidResult = async () => {
+    const fetchAllSimulateResult = async () => {
       try {
         const resultMap = new Map(results);
+        console.log("trying to fetch");
         await Promise.all(
           allRequests
             .filter(
@@ -73,16 +75,14 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
       }
     };
 
-    fetchAllTrackingUuidResult();
-  }, [allRequests]);
+    fetchAllSimulateResult();
+  }, [nonCompleteUuids]);
 
   useEffect(() => {
-    const fetchSimulateResult = async () => {
+    const fetchSimulateRequestStatus = async () => {
       if (nonCompleteUuids.length === 0) return;
-      console.log(nonCompleteUuids);
-      const simulateResults = await getBatchSimulateStatus(nonCompleteUuids);
-      console.log(simulateResults);
-      const newNonCompletedList = Object.entries(simulateResults)
+      const simulateStatus = await getBatchSimulateStatus(nonCompleteUuids);
+      const newNonCompletedList = Object.entries(simulateStatus)
         .filter(
           ([, value]) =>
             value !== StatusMessage.COMPLETED.toString() &&
@@ -91,14 +91,14 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
         .map(([key]) => key);
       setNonCompleteUuids(newNonCompletedList);
       const newUuidStatusMap = new Map(uuidStatusMap);
-      for (const [key, value] of Object.entries(simulateResults)) {
+      for (const [key, value] of Object.entries(simulateStatus)) {
         newUuidStatusMap.set(key, value);
       }
       setUuidStatusMap(newUuidStatusMap);
     };
 
     const intervalId = setInterval(() => {
-      fetchSimulateResult();
+      fetchSimulateRequestStatus();
     }, 1000);
 
     return () => clearInterval(intervalId); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
@@ -177,7 +177,6 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
                       >
                         <TableCell>{request.trackingUuid}</TableCell>
                         <TableCell>
-                          // need to fix here
                           {getLoadingOrCompleteIcon(
                             uuidStatusMap.get(request.trackingUuid)
                           )}
