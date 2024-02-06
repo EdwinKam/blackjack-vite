@@ -1,8 +1,8 @@
 import axios from "axios";
 import { GameResult, SimulateRequestHistory } from "../models/blackjackTypes";
 
-const url = "https://blackjack-service-render.onrender.com/blackjack";
-// const url = "http://localhost:8080/blackjack";
+// const url = "https://blackjack-service-render.onrender.com/blackjack";
+const url = "http://localhost:8080/blackjack";
 
 export type Condition = {
   leftValue: string;
@@ -89,22 +89,15 @@ export const getBatchSimulateStatus = async (
   }
 };
 
-export const getAllRequests = async (): Promise<
-  Map<string, SimulateRequestHistory>
-> => {
+export const getAllRequests = async (): Promise<SimulateRequestHistory[]> => {
   try {
-    const response = await axios.get(`${url}/getAllTrackingUuid`, {
+    const response = await axios.get(`${url}/getAllSimulateRequest`, {
       headers: {
         "Content-Type": "application/json",
       },
     });
-    const resultMap = new Map<string, SimulateRequestHistory>();
     if (response.status === 200) {
-      for (const [key, value] of Object.entries(response.data)) {
-        resultMap.set(key, value as SimulateRequestHistory);
-      }
-
-      return resultMap;
+      return response.data as SimulateRequestHistory[];
     } else {
       throw new Error(`Request failed with status code ${response.status}`);
     }

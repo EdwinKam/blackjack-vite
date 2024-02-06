@@ -30,22 +30,18 @@ interface DashboardProps {
 
 function Dashboard({ refreshDashboard }: DashboardProps) {
   const [results, setResults] = useState(new Map<string, GameResult>());
-  const [trackingUuids, setTrackingUuids] = useState<string[]>([]);
-  const [selectedTrackingUuid, setSelectedTrackingUuid] = useState<string>();
+  const [allRequests, setAllRequest] = useState<SimulateRequestHistory[]>([]);
+  const [selectedRequest, setSelectedRequest] =
+    useState<SimulateRequestHistory>();
   const [nonCompleteUuids, setNonCompleteUuids] = useState<string[]>([]);
   const [uuidStatusMap, setUuidStatusMap] = useState(new Map<string, string>());
-  const [requestMap, setRequestMap] = useState(
-    new Map<string, SimulateRequestHistory>()
-  );
 
   useEffect(() => {
     console.log("refresh uuid");
     const fetchAllTrackingUuid = async () => {
       try {
         const results = await getAllRequests();
-        setRequestMap(results);
-        setTrackingUuids(Array.from(results.keys()));
-        setNonCompleteUuids(Array.from(results.keys()));
+        setAllRequest(results);
       } catch (error) {
         console.error(`Failed to fetch tracking UUIDs: ${error}`);
       }
@@ -59,15 +55,16 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
       try {
         const resultMap = new Map(results);
         await Promise.all(
-          trackingUuids
+          allRequests
             .filter(
-              (uuid) =>
-                !results.get(uuid) &&
-                uuidStatusMap.get(uuid) === StatusMessage.COMPLETED.toString()
+              (request) =>
+                !results.get(request.trackingUuid) &&
+                uuidStatusMap.get(request.trackingUuid) ===
+                  StatusMessage.COMPLETED.toString()
             )
-            .map(async (trackingUuid) => {
-              const result = await getSimulateResult(trackingUuid);
-              resultMap.set(trackingUuid, result);
+            .map(async (request) => {
+              const result = await getSimulateResult(request.trackingUuid);
+              resultMap.set(request.trackingUuid, result);
             })
         );
         setResults(resultMap);
@@ -77,7 +74,7 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
     };
 
     fetchAllTrackingUuidResult();
-  }, [trackingUuids, nonCompleteUuids]);
+  }, [allRequests]);
 
   useEffect(() => {
     const fetchSimulateResult = async () => {
@@ -154,36 +151,43 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {trackingUuids
+                  {allRequests
                     .sort((a, b) => {
-                      const timeA = requestMap.get(a)?.creationTimeStamp;
-                      const timeB = requestMap.get(b)?.creationTimeStamp;
+                      const timeA = a.creationTimeStamp;
+                      const timeB = b.creationTimeStamp;
 
                       if (timeA === undefined) return -1;
                       if (timeB === undefined) return 1;
 
                       return timeB - timeA; // For descending order
                     })
-                    .map((uuid) => (
+                    .map((request) => (
                       <TableRow
-                        key={uuid}
+                        key={request.trackingUuid}
                         onClick={() => {
-                          setSelectedTrackingUuid(uuid);
+                          setSelectedRequest(request);
                         }}
                         style={{
                           background:
-                            selectedTrackingUuid === uuid ? "#f0f0f0" : "",
+                            selectedRequest?.trackingUuid ===
+                            request.trackingUuid
+                              ? "#f0f0f0"
+                              : "",
                         }}
                       >
-                        <TableCell>{uuid}</TableCell>
+                        <TableCell>{request.trackingUuid}</TableCell>
                         <TableCell>
-                          {getLoadingOrCompleteIcon(uuidStatusMap.get(uuid))}
+                          // need to fix here
+                          {getLoadingOrCompleteIcon(
+                            uuidStatusMap.get(request.trackingUuid)
+                          )}
                         </TableCell>
-                        <TableCell>{requestMap.get(uuid)?.numOfGame}</TableCell>
+                        <TableCell>{request.numOfGame}</TableCell>
                         <TableCell>
                           {
-                            getLastGameRecord(results?.get(uuid))
-                              ?.playerAfterGameAsset
+                            getLastGameRecord(
+                              results?.get(request.trackingUuid)
+                            )?.playerAfterGameAsset
                           }
                         </TableCell>
                       </TableRow>
@@ -195,7 +199,7 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
         </Grid>
         <Grid item xs={6}>
           <Paper elevation={3}>
-            {selectedTrackingUuid && (
+            {selectedRequest && (
               <>
                 <TableContainer>
                   <Table>
@@ -208,20 +212,17 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
                     <TableBody>
                       <TableRow key={2}>
                         <TableCell>
-                          {getDateTime(
-                            requestMap.get(selectedTrackingUuid)
-                              ?.creationTimeStamp
-                          )}
+                          {getDateTime(selectedRequest.creationTimeStamp)}
                         </TableCell>
                         <TableCell>
                           <Box>
-                            {requestMap
-                              .get(selectedTrackingUuid)
-                              ?.customPlayerBetStrategies.map((s, index) => (
+                            {selectedRequest?.customPlayerBetStrategies.map(
+                              (s, index) => (
                                 <div key={index}>
                                   {`${s.leftValue} ${s.comparisonOperator} ${s.rightValue} bet: ${s.bet}`}
                                 </div>
-                              ))}
+                              )
+                            )}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -241,7 +242,7 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
                     </TableHead>
                     <TableBody>
                       {results
-                        ?.get(selectedTrackingUuid)
+                        ?.get(selectedRequest?.trackingUuid)
                         ?.gameRecords.flatMap((record, index) =>
                           record.playerAllHands.map((hand, handIndex) => (
                             <TableRow key={`${index}-${handIndex}`}>
