@@ -29,6 +29,8 @@ export interface SimulateRequestHistory {
   numOfGame: number;
   trackingUuid: string;
   creationTimeStamp: number;
+  cutOff: number;
+  numOfDecks: number;
 }
 
 export enum StatusMessage {

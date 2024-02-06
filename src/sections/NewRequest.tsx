@@ -18,6 +18,8 @@ function NewRequest({ setRefreshDashboard }: NewRequestProps) {
   const [conditions, setConditions] = useState<Condition[]>([
     { leftValue: "", comparisonOperator: "", rightValue: "", bet: "" },
   ]);
+  const [numOfDecks, setNumOfDecks] = useState("");
+  const [cutOff, setCutOff] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const options = ["<", ">", ">=", "<=", "="];
 
@@ -82,26 +84,62 @@ function NewRequest({ setRefreshDashboard }: NewRequestProps) {
         } ${condition.rightValue} ${condition.bet}`
       );
     });
-    console.log(await simulateRequest(numOfGames, conditions));
+    console.log(
+      await simulateRequest(numOfGames, conditions, numOfDecks, cutOff)
+    );
     // Continue processing...
   };
 
   return (
     <Box display="flex" flexDirection="column" gap={2} padding={2}>
-      <TextField
-        id="outlined-basic"
-        label="Number of Games"
-        variant="outlined"
-        value={numOfGames}
-        error={isSubmitted && (numOfGames === "" || isNaN(Number(numOfGames)))}
-        helperText={
-          isSubmitted &&
-          (numOfGames === "" || isNaN(Number(numOfGames))) &&
-          "Please enter a valid number"
-        }
-        onChange={(e) => setNumOfGames(e.target.value)}
-        style={{ width: 300 }}
-      />
+      <Box display="flex" gap={2}>
+        <TextField
+          id="outlined-basic"
+          label="Number of Games"
+          variant="outlined"
+          value={numOfGames}
+          error={
+            isSubmitted && (numOfGames === "" || isNaN(Number(numOfGames)))
+          }
+          helperText={
+            isSubmitted &&
+            (numOfGames === "" || isNaN(Number(numOfGames))) &&
+            "Please enter a valid number"
+          }
+          onChange={(e) => setNumOfGames(e.target.value)}
+          style={{ width: 300 }}
+        />
+        <TextField
+          id="outlined-basic"
+          label="Number of Decks"
+          variant="outlined"
+          value={numOfDecks}
+          error={
+            isSubmitted && (numOfDecks === "" || isNaN(Number(numOfDecks)))
+          }
+          helperText={
+            isSubmitted &&
+            (numOfDecks === "" || isNaN(Number(numOfDecks))) &&
+            "Please enter a valid number"
+          }
+          onChange={(e) => setNumOfDecks(e.target.value)}
+          style={{ width: 300 }}
+        />
+        <TextField
+          id="outlined-basic"
+          label="Cut Off"
+          variant="outlined"
+          value={cutOff}
+          error={isSubmitted && (cutOff === "" || isNaN(Number(cutOff)))}
+          helperText={
+            isSubmitted &&
+            (cutOff === "" || isNaN(Number(cutOff))) &&
+            "Please enter a valid number"
+          }
+          onChange={(e) => setCutOff(e.target.value)}
+          style={{ width: 300 }}
+        />
+      </Box>
       {conditions.map((condition, index) => (
         <Box key={index} display="flex" gap={2}>
           <TextField

@@ -206,6 +206,8 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
                       <TableRow>
                         <TableCell>Creation Time</TableCell>
                         <TableCell>request</TableCell>
+                        <TableCell>numOfDecks</TableCell>
+                        <TableCell>cutOff</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -215,6 +217,7 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
                         </TableCell>
                         <TableCell>
                           <Box>
+                            ß
                             {selectedRequest?.customPlayerBetStrategies.map(
                               (s, index) => (
                                 <div key={index}>
@@ -224,6 +227,8 @@ function Dashboard({ refreshDashboard }: DashboardProps) {
                             )}
                           </Box>
                         </TableCell>
+                        <TableCell>{selectedRequest.numOfDecks}</TableCell>
+                        <TableCell>{selectedRequest.cutOff}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
